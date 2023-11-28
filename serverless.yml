@@ -1,0 +1,87 @@
+service: serverless-shortlinker-aws
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  deploymentBucket:
+    name: serverless-shortlinker-aws-dev
+  profile: serverlessUser
+  region: eu-central-1
+  # environment:
+  #   tableName: ${self:custom.tableName}  
+  iam:
+   role:
+     statements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:*
+        Resource: '*'
+plugins:
+    -serverless-webpack
+
+package:
+    individually: true
+
+functions:
+    expressApp:
+      handler: app.handler
+      events:
+        - http:
+            path: /
+            method: ANY
+            cors: true
+  # makeShort:
+  #   handler: makeShort.handler
+  #   events:
+  #    - http:
+  #         path: shortLink
+  #         method: POST
+  #         cors: true
+  # reroute:        
+  #   handler: reroute.handler
+  #   events: 
+  #     - http:
+  #         path: "{shortCode}"
+  #         method: GET
+  #         cors: true
+
+resources:
+  Resources:
+    UsersTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: users
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S            
+          - AttributeName: id
+            AttributeType: N
+        KeySchema:          
+          - AttributeName: email
+            KeyType:  HASH
+          - AttributeName: id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    LinksTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: links
+        AttributeDefinitions:
+          - AttributeName: shortCode
+            AttributeType: S            
+          - AttributeName: id
+            AttributeType: N
+        KeySchema:
+          - AttributeName: shortCode
+            KeyType: HASH
+          - AttributeName: id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+

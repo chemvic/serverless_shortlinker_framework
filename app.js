@@ -1,19 +1,20 @@
+const serverless = require('serverless-http');
+const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
-const authRouter= require('./routes/auth.js');
-const userRouter = require('./routes/users.js');
+// const authRouter= require('./routes/auth.js');
+// const userRouter = require('./routes/users.js');
 const linksRouter = require('./routes/links.js');
-
+require("dotenv").config();
 
 const app= express();
-
+app.use(bodyParser.json({ strict: false }));
 
 app.use(cors());
-app.use(express.json());
 
-app.use("/auth", authRouter);
+// app.use("/auth", authRouter);
 
-app.use("/", userRouter);
+// app.use("/", userRouter);
 
 app.use("/", linksRouter);
 
@@ -28,5 +29,5 @@ res.status(status).json({message});
 
 
 
-
-module.exports = app;
+	
+module.exports.handler = serverless(app);
